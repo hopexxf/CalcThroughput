@@ -1,28 +1,5 @@
-﻿生成启动时间为 2018/5/31 23:30:29。
-     1>项目“E:\myfile\windows API\CalcThroughput\CalcThroughput\CalcThroughput.vcxproj”在节点 2 上(Build 个目标)。
-     1>ClCompile:
-         D:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Release\CalcThroughput.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
-         stdafx.cpp
-         D:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\CalcThroughput.pch" /Fo"Release\\" /Fd"Release\vc110.pdb" /Gd /TP /analyze- /errorReport:prompt CalcThroughput.cpp calc_throughput_alg.cpp
-         CalcThroughput.cpp
-         calc_throughput_alg.cpp
-     1>calc_throughput_alg.cpp(112): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-     1>calc_throughput_alg.cpp(118): warning C4244: “参数”: 从“double”转换到“long”，可能丢失数据
-     1>calc_throughput_alg.cpp(120): warning C4244: “参数”: 从“long”转换到“unsigned char”，可能丢失数据
-     1>calc_throughput_alg.cpp(126): warning C4244: “参数”: 从“double”转换到“long”，可能丢失数据
-     1>calc_throughput_alg.cpp(127): warning C4244: “参数”: 从“long”转换到“unsigned char”，可能丢失数据
-       ResourceCompile:
-         C:\Program Files (x86)\Windows Kits\8.0\bin\x86\rc.exe /D _UNICODE /D UNICODE /l"0x0409" /nologo /fo"Release\CalcThroughput.res" CalcThroughput.rc 
-       Link:
-         D:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\myfile\windows API\CalcThroughput\Release\CalcThroughput.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\myfile\windows API\CalcThroughput\Release\CalcThroughput.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\myfile\windows API\CalcThroughput\Release\CalcThroughput.lib" /MACHINE:X86 /SAFESEH Release\CalcThroughput.res
-         Release\CalcThroughput.obj
-         Release\calc_throughput_alg.obj
-         Release\stdafx.obj
-         正在生成代码
-         已完成代码的生成
-         CalcThroughput.vcxproj -> E:\myfile\windows API\CalcThroughput\Release\CalcThroughput.exe
-     1>已完成生成项目“E:\myfile\windows API\CalcThroughput\CalcThroughput\CalcThroughput.vcxproj”(Build 个目标)的操作。
+﻿生成启动时间为 2018/6/21 23:27:54。
 
 生成成功。
 
-已用时间 00:00:01.41
+已用时间 00:00:00.00
