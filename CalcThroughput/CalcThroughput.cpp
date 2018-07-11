@@ -755,6 +755,26 @@ INT_PTR CALLBACK ProfessionEnable(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	return (INT_PTR)FALSE;
 }
 
+static TCHAR g_LOG[1000] = _T(\
+"\
+CalcThroughput，1.1 版\r\n\
+基于2.06协议，DDSU帧结构\r\n\
+1、增加高级参数校验，大概应该可以放开；\r\n\
+2、增加上行256QAM功能；\r\n\
+3、增加单个slot的tbSize结果输出；\r\n\
+4、波形参数改动不再影响下行；\r\n\
+5、增加更新记录；\r\n\
+Date: 0712\r\n\
+==========================================\r\n\
+CalcThroughput，1.0 版\r\n\
+基于2.06协议，DDSU帧结构\r\n\
+支持上下行流量计算，暂不放开高级功能（ps：参数好多，好难校验 -_-!）\r\n\
+唔，那个waveform为1表示cp，0表示dft。后续会考虑优化下这个。\r\n\
+Date: 0529\r\n\
+==========================================\r\n\
+"\
+                              );
+
 // “关于”框的消息处理程序。
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -762,7 +782,11 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		return (INT_PTR)TRUE;
+        {
+            HWND hwnd = GetDlgItem(hDlg, IDC_EDIT_LOG);
+            SetWindowText(hwnd, g_LOG);
+		    return (INT_PTR)TRUE;
+        }
 
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
