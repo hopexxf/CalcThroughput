@@ -12,7 +12,7 @@
 #define TEXTBOX_WIDTH       50       // 文本框宽度
 #define TEXTBOX_HEIGHT      20       // 文本框高度
 #define TEXTBOX_MAXLENGTH   32       // 文本框中文本的最大长度
-#define OUTPUT_POS_TOP      250
+#define OUTPUT_POS_TOP      210
 #define OUTPUT_POS_LEFT     70
 #define MAX_INPUT_LEN       5
 
@@ -49,6 +49,12 @@ typedef struct Throughput
 {
     TCHAR ulThroughput[100];
     TCHAR dlThroughput[100];
+
+    TCHAR ulTbSizeWithoutCodeRateCtrl[100];
+    TCHAR dlTbSizeWithoutCodeRateCtrl[100];
+
+    TCHAR ulTbSizeWithCodeRateCtrl[100];
+    TCHAR dlTbSizeWithCodeRateCtrl[100];
 }Throughput;
 
 // 全局变量:
@@ -94,7 +100,7 @@ TextInfo g_proTextInfo[] = {
                                 {0, _T("11"), ::_tcslen(g_proTextInfo[22].text), _T("dlSymInS"), PRO_TEXT_ROW_N(0), PRO_TEXT_LINE_N(11), &g_cfg.dlSymInS, 0, 14}
 						   };
 
-Throughput g_throughput = {_T("0"), _T("0")};
+Throughput g_throughput = {_T("0"), _T("0"), _T("0"), _T("0"), _T("0"), _T("0")};
 
 HINSTANCE hInst;								// 当前实例
 TCHAR szTitle[MAX_LOADSTRING];					// 标题栏文本
@@ -324,12 +330,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             //按钮1
             hwndButton[0] = CreateWindow(TEXT("BUTTON"),TEXT("生成"),      
                 WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  
-                80,200,50,30,hWnd,NULL,
+                80,160,50,30,hWnd,NULL,
                 (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
             //按钮3
             hwndButton[1] = CreateWindow(TEXT("BUTTON"),TEXT("高级"),      
                 WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  
-                240,200,50,30,hWnd,NULL,
+                240,160,50,30,hWnd,NULL,
                 (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), NULL);
 			break;
 		}
@@ -351,6 +357,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             _i64tow_s(CalcUlThroughput(), g_throughput.ulThroughput, sizeof(g_throughput.ulThroughput)/sizeof(TCHAR), 10);
             _i64tow_s(CalcDlThroughput(), g_throughput.dlThroughput, sizeof(g_throughput.dlThroughput)/sizeof(TCHAR), 10);
+
+            _i64tow_s(CalcUlTbSizeWithCodeRateCtrl(), g_throughput.ulTbSizeWithCodeRateCtrl, sizeof(g_throughput.ulTbSizeWithCodeRateCtrl)/sizeof(TCHAR), 10);
+            _i64tow_s(CalcDlTbSizeWithCodeRateCtrl(), g_throughput.dlTbSizeWithCodeRateCtrl, sizeof(g_throughput.dlTbSizeWithCodeRateCtrl)/sizeof(TCHAR), 10);
 
             GetClientRect(hWnd, &rect);
             rect.top = OUTPUT_POS_TOP;
@@ -391,6 +400,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             TextOut(hdc, OUTPUT_POS_LEFT+80, OUTPUT_POS_TOP, g_throughput.ulThroughput, _tcslen(g_throughput.ulThroughput));
             TextOut(hdc, OUTPUT_POS_LEFT, OUTPUT_POS_TOP+30, _T("下行流量："), 5);
             TextOut(hdc, OUTPUT_POS_LEFT+80, OUTPUT_POS_TOP+30, g_throughput.dlThroughput, _tcslen(g_throughput.dlThroughput));
+
+            TextOut(hdc, OUTPUT_POS_LEFT, OUTPUT_POS_TOP+60, _T("上行单slot TbSize："), 15);
+            TextOut(hdc, OUTPUT_POS_LEFT+140, OUTPUT_POS_TOP+60, g_throughput.ulTbSizeWithCodeRateCtrl, _tcslen(g_throughput.ulTbSizeWithCodeRateCtrl));
+            TextOut(hdc, OUTPUT_POS_LEFT, OUTPUT_POS_TOP+90, _T("下行单slot TbSize："), 15);
+            TextOut(hdc, OUTPUT_POS_LEFT+140, OUTPUT_POS_TOP+90, g_throughput.dlTbSizeWithCodeRateCtrl, _tcslen(g_throughput.dlTbSizeWithCodeRateCtrl));
 
 		    EndPaint(hWnd, &ps);
 		    break;

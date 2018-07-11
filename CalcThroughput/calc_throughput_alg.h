@@ -54,3 +54,9 @@ typedef struct CfgInfo
 
 long long CalcUlThroughput();
 long long CalcDlThroughput();
+
+long long CalcUlTbSizeWithCodeRateCtrl();
+long long CalcDlTbSizeWithCodeRateCtrl();
+
+long long CalcUlTbSizeWithoutCodeRateCtrl();
+long long CalcDlTbSizeWithoutCodeRateCtrl();

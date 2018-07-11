@@ -2,3 +2,4 @@ CalcThroughput/Debug/*
 CalcThroughput/Release/*
 Debug/*
 Release/*
+ipch/*

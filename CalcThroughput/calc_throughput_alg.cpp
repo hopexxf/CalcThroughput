@@ -14,6 +14,8 @@ typedef enum McsTableType
 #define GET_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define GET_MIN(a, b) ((a) > (b) ? (b) : (a))
 
+static bool isCodeRateCtrl = true;
+
 static unsigned char qm4Mcs[3][32] =
 {
     /* PDSCH 64QAM */
@@ -181,6 +183,22 @@ int CalcSpecDlSym()
 
 /* ====================================================================================== */
 
+static void CodeRateCtrl(McsTableType tableType, int reNumPerRb, int rbNum, int deltaRe, int layer, long long *uetbSize)
+{
+    if(!isCodeRateCtrl) return;
+
+    int i = 0;
+    long long tbSize = *uetbSize;
+
+    while((rbNum*reNumPerRb-deltaRe)*CODE_RADIO_CTRL_THR*layer*qm4Mcs[tableType][g_cfg.mcs-i] < tbSize*100)
+    {
+        i++;
+        tbSize = CalcTbSizeUesFormula(tableType, reNumPerRb, rbNum, g_cfg.mcs-i, layer);
+        if(g_cfg.mcs-i == 0) break;
+    }
+    *uetbSize = tbSize;
+}
+
 long long CalcAllTbSizeInSlot(McsTableType tableType, int reNumPerRb, int rbNum, int deltaRe)
 {
     long long tbSize = 0, uetbSize;
@@ -193,12 +211,7 @@ long long CalcAllTbSizeInSlot(McsTableType tableType, int reNumPerRb, int rbNum,
     if(m > 0)
     {
         uetbSize = CalcTbSizeUesFormula(tableType, reNumPerRb, rbNum, g_cfg.mcs, g_cfg.ueMaxLayer);
-        while((rbNum*reNumPerRb-deltaRe)*CODE_RADIO_CTRL_THR*g_cfg.ueMaxLayer*qm4Mcs[tableType][g_cfg.mcs-i] < uetbSize*100)
-        {
-            i++;
-            uetbSize = CalcTbSizeUesFormula(tableType, reNumPerRb, rbNum, g_cfg.mcs-i, g_cfg.ueMaxLayer);
-            if(g_cfg.mcs-i == 0) break;
-        }
+        CodeRateCtrl(tableType, reNumPerRb, rbNum, deltaRe, g_cfg.ueMaxLayer, &uetbSize);
         tbSize = m*uetbSize;
     }
 
@@ -206,22 +219,25 @@ long long CalcAllTbSizeInSlot(McsTableType tableType, int reNumPerRb, int rbNum,
     if(remaindLayer > 0)
     {
         uetbSize = CalcTbSizeUesFormula(tableType, reNumPerRb, rbNum, g_cfg.mcs, remaindLayer);
-        while((rbNum*reNumPerRb-deltaRe)*CODE_RADIO_CTRL_THR*remaindLayer*qm4Mcs[tableType][g_cfg.mcs-i] < uetbSize*100)
-        {
-            i++;
-            uetbSize = CalcTbSizeUesFormula(tableType, reNumPerRb, rbNum, g_cfg.mcs-i, remaindLayer);
-            if(g_cfg.mcs-i == 0) break;
-        }
+        CodeRateCtrl(tableType, reNumPerRb, rbNum, deltaRe, remaindLayer, &uetbSize);
         tbSize += uetbSize;
     }
 
     return tbSize;
 }
 
-McsTableType GetTableType()
+McsTableType GetUlTableType()
 {
-    if(g_cfg.waveform == WAVEFORM_DFT) return QAM64TP_TABLE;
+    if(g_cfg.is256Qam == TRUE)
+        return QAM256_TABLE;
+    else if(g_cfg.waveform == WAVEFORM_DFT)
+        return QAM64TP_TABLE;
+    else
+        return QAM64_TABLE;
+}
 
+McsTableType GetDlTableType()
+{
     if(g_cfg.is256Qam == TRUE)
         return QAM256_TABLE;
     else
@@ -230,7 +246,7 @@ McsTableType GetTableType()
 
 long long CalcThroughputInD()
 {
-    McsTableType tableType = GetTableType();
+    McsTableType tableType = GetDlTableType();
     int symNum = CalcAllDSym();
     int reNumPerRbNoCsi = RE_NUM_PER_SC * symNum;
     int reNumPerRbWithCsi = reNumPerRbNoCsi - RE_NUM_PER_SC * g_cfg.csiSym;
@@ -258,7 +274,7 @@ long long CalcThroughputInD()
 
 long long CalcThroughputInS()
 {
-    McsTableType tableType = GetTableType();
+    McsTableType tableType = GetDlTableType();
     int symNum = CalcSpecDlSym();
     int reNumPerRb = RE_NUM_PER_SC * symNum;
 
@@ -270,7 +286,7 @@ long long CalcThroughputInS()
 
 long long CalcThroughputInU()
 {
-    McsTableType tableType = GetTableType();
+    McsTableType tableType = GetUlTableType();
     int symNum = CalcAllUSym();
     int reNumPerRb = RE_NUM_PER_SC * symNum;
     int rbNumWithPrachPucch = GET_MIN(g_cfg.rbNum, MAX_RB_NUM-g_cfg.prachRbNum-g_cfg.longPucchRbNum);
@@ -300,10 +316,68 @@ long long CalcThroughputInU()
 
 long long CalcUlThroughput()
 {
+    isCodeRateCtrl = true;
+
     return CalcThroughputInU();
 }
 
 long long CalcDlThroughput()
 {
+    isCodeRateCtrl = true;
+
     return CalcThroughputInD() + CalcThroughputInS();
+}
+
+long long CalcUlTbSize()
+{
+    McsTableType tableType = GetUlTableType();
+    int symNum = CalcAllUSym();
+    int reNumPerRb = RE_NUM_PER_SC * symNum;
+    int rbNumWithPrachPucch = GET_MIN(g_cfg.rbNum, MAX_RB_NUM-g_cfg.prachRbNum-g_cfg.longPucchRbNum);
+
+    if(g_cfg.longPucchRbNum == 0)
+    {
+        return CalcAllTbSizeInSlot(tableType, reNumPerRb, g_cfg.rbNum, 0);
+    }
+    else
+    {
+        return CalcAllTbSizeInSlot(tableType, reNumPerRb, rbNumWithPrachPucch, 0);
+    }
+}
+
+long long CalcDlTbSize()
+{
+    McsTableType tableType = GetDlTableType();
+    int symNum = CalcAllDSym();
+    int reNumPerRbNoCsi = RE_NUM_PER_SC * symNum;
+
+    return CalcAllTbSizeInSlot(tableType, reNumPerRbNoCsi, g_cfg.rbNum, 0);
+}
+
+long long CalcUlTbSizeWithCodeRateCtrl()
+{
+    isCodeRateCtrl = true;
+
+    return CalcUlTbSize();
+}
+
+long long CalcDlTbSizeWithCodeRateCtrl()
+{
+    isCodeRateCtrl = true;
+
+    return CalcDlTbSize();
+}
+
+long long CalcUlTbSizeWithoutCodeRateCtrl()
+{
+    isCodeRateCtrl = false;
+
+    return CalcUlTbSize();
+}
+
+long long CalcDlTbSizeWithoutCodeRateCtrl()
+{
+    isCodeRateCtrl = false;
+
+    return CalcDlTbSize();
 }
