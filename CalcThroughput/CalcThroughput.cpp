@@ -259,8 +259,7 @@ static bool MainSpecialCheck(TextInfo *textInfo, int len)
     int is256QamEnable = _wtoi(textInfo[4].text);
 
     if(ueLayer > totalLayer) return false;
-    if(waveform == 0 && (mcs > 27 || is256QamEnable == 1)) return false;
-    if(is256QamEnable == 1 && mcs > 27) return false;
+    if((waveform == 0 || is256QamEnable == 1) && mcs > 27 ) return false;
 
     return true;
 }
@@ -764,6 +763,7 @@ CalcThroughput，1.1 版\r\n\
 3、增加单个slot的tbSize结果输出；\r\n\
 4、波形参数改动不再影响下行；\r\n\
 5、增加更新记录；\r\n\
+6、DFT支持235原则，最大RB为100；\r\n\
 Date: 0712\r\n\
 ==========================================\r\n\
 CalcThroughput，1.0 版\r\n\

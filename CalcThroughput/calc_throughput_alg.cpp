@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "calc_throughput_alg.h"
 
+#define MAX_RB_NUM_DFT 100
+
 typedef enum McsTableType
 {
     QAM64_TABLE,
@@ -284,16 +286,57 @@ long long CalcThroughputInS()
     return tbSize*schdCnt;
 }
 
+static int Get235RbNum(int rbNum, bool isFloor)
+{
+    int mod2, mod3, mod5;
+
+    if(isFloor)
+    {
+        mod2 = rbNum % 2;
+        mod3 = rbNum % 3;
+        mod5 = rbNum % 5;
+
+        if(mod2 <= mod3 && mod2 <= mod5) return rbNum-mod2;
+        if(mod3 <= mod2 && mod3 <= mod5) return rbNum-mod3;
+        if(mod5 <= mod3 && mod5 <= mod2) return rbNum-mod5;
+    }
+    else
+    {
+        mod2 = (2 - ((rbNum+2) % 2)) % 2;
+        mod3 = (3 - ((rbNum+3) % 3)) % 3;
+        mod5 = (5 - ((rbNum+5) % 5)) % 5;
+
+        if(mod2 <= mod3 && mod2 <= mod5) return rbNum+mod2;
+        if(mod3 <= mod2 && mod3 <= mod5) return rbNum+mod3;
+        if(mod5 <= mod3 && mod5 <= mod2) return rbNum+mod5;
+    }
+}
+
+static int GetUlRbNum(int rbNum, int maxRbNum)
+{
+    if(g_cfg.waveform == 1) return rbNum;
+
+    if(rbNum > maxRbNum) return Get235RbNum(maxRbNum, true);
+
+    int rstRbNum = Get235RbNum(rbNum, false);
+
+    if(rstRbNum <= maxRbNum) 
+        return rstRbNum;
+    else
+        return Get235RbNum(maxRbNum, true);
+}
+
 long long CalcThroughputInU()
 {
     McsTableType tableType = GetUlTableType();
+    int rbNum = GetUlRbNum(g_cfg.rbNum, MAX_RB_NUM_DFT);
     int symNum = CalcAllUSym();
     int reNumPerRb = RE_NUM_PER_SC * symNum;
-    int rbNumWithPrachPucch = GET_MIN(g_cfg.rbNum, MAX_RB_NUM-g_cfg.prachRbNum-g_cfg.longPucchRbNum);
+    int rbNumWithPrachPucch = GetUlRbNum(rbNum, MAX_RB_NUM-g_cfg.prachRbNum-g_cfg.longPucchRbNum);
 
     if(g_cfg.longPucchRbNum == 0)
     {
-        long long tbSize = CalcAllTbSizeInSlot(tableType, reNumPerRb, g_cfg.rbNum, 0);
+        long long tbSize = CalcAllTbSizeInSlot(tableType, reNumPerRb, rbNum, 0);
         long long tbSizeWithPrach = CalcAllTbSizeInSlot(tableType, reNumPerRb, rbNumWithPrachPucch, 0);
         long long schdCnt = SLOT_NUM_IN_1S/4;
         long long schdCntWithPrach = (g_cfg.prachPeriod>0) ? 1000/g_cfg.prachPeriod : 0;
@@ -331,13 +374,14 @@ long long CalcDlThroughput()
 long long CalcUlTbSize()
 {
     McsTableType tableType = GetUlTableType();
+    int rbNum = GetUlRbNum(g_cfg.rbNum, MAX_RB_NUM_DFT);
     int symNum = CalcAllUSym();
     int reNumPerRb = RE_NUM_PER_SC * symNum;
-    int rbNumWithPrachPucch = GET_MIN(g_cfg.rbNum, MAX_RB_NUM-g_cfg.prachRbNum-g_cfg.longPucchRbNum);
+    int rbNumWithPrachPucch = GetUlRbNum(rbNum, MAX_RB_NUM-g_cfg.prachRbNum-g_cfg.longPucchRbNum);
 
     if(g_cfg.longPucchRbNum == 0)
     {
-        return CalcAllTbSizeInSlot(tableType, reNumPerRb, g_cfg.rbNum, 0);
+        return CalcAllTbSizeInSlot(tableType, reNumPerRb, rbNum, 0);
     }
     else
     {
